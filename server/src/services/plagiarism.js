@@ -36,25 +36,42 @@ export function cosine(wordsA, wordsB) {
   return denom ? dot / denom : 0;
 }
 
-// Tỉ lệ (0..100) văn bản `a` trùng với `b`
-export function similarity(a, b) {
+// Tỉ lệ (0..100) văn bản `a` trùng với `b`.
+// `common`: tập shingle phổ biến (xuất hiện ở nhiều bài, vd. trích đề bài) — không tính là trùng.
+export function similarity(a, b, common = null) {
   const wa = normalize(a);
   const wb = normalize(b);
   if (!wa.length || !wb.length) return 0;
-  const sa = shingles(wa);
   const sb = shingles(wb);
-  let common = 0;
-  for (const s of sa) if (sb.has(s)) common++;
-  const containment = common / sa.size;
-  const score = 0.7 * containment + 0.3 * cosine(wa, wb);
+  let sa = shingles(wa);
+  if (common) {
+    const filtered = new Set([...sa].filter((s) => !common.has(s)));
+    // Bài gần như chỉ gồm cụm phổ biến => không đủ dữ kiện để kết luận
+    if (filtered.size < Math.max(3, sa.size * 0.1)) return 0;
+    sa = filtered;
+  }
+  let shared = 0;
+  for (const s of sa) if (sb.has(s)) shared++;
+  const containment = shared / sa.size;
+  const score = common ? 0.9 * containment + 0.1 * cosine(wa, wb) : 0.7 * containment + 0.3 * cosine(wa, wb);
   return Math.round(score * 10000) / 100;
 }
 
-// So một bài với danh sách bài khác, trả về bài giống nhất
+// Shingle xuất hiện ở hơn 30% số bài (tối thiểu 3 bài) được coi là cụm phổ biến
+export function commonShingles(texts, ratio = 0.3) {
+  const df = new Map();
+  for (const t of texts) for (const s of shingles(normalize(t))) df.set(s, (df.get(s) || 0) + 1);
+  const limit = Math.max(3, Math.ceil(texts.length * ratio));
+  return new Set([...df].filter(([, n]) => n >= limit).map(([s]) => s));
+}
+
+// So một bài với danh sách bài khác, trả về bài giống nhất.
+// Khi đủ nhiều bài (>= 5) thì lọc bỏ các cụm phổ biến để tránh báo động giả.
 export function findMostSimilar(content, others) {
+  const common = others.length >= 4 ? commonShingles([content, ...others.map((o) => o.content)]) : null;
   let best = { score: 0, sourceId: null };
   for (const o of others) {
-    const score = similarity(content, o.content);
+    const score = similarity(content, o.content, common);
     if (score > best.score) best = { score, sourceId: o.id };
   }
   return best;

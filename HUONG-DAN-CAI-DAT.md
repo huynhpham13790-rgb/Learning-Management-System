@@ -44,6 +44,17 @@ Bên trong thư mục phải thấy: `client`, `server`, `database`, `docs`, `se
 
 ## Bước 3 — Cài MySQL (cơ sở dữ liệu)
 
+Chọn **một trong hai** cách. Máy đã có XAMPP thì dùng cách 3A cho nhanh.
+
+### Cách 3A — Dùng XAMPP (dễ nhất)
+
+1. Tải XAMPP tại **https://www.apachefriends.org** → bản Windows → cài đặt, bấm **Next** liên tục (giữ mặc định, thư mục `C:\xampp`).
+2. Mở **XAMPP Control Panel** → ở dòng **MySQL** bấm **Start** (chữ MySQL chuyển nền xanh là được).
+   Mỗi lần dùng EduTrack đều phải Start MySQL trong XAMPP trước (hoặc bấm **Config → Autostart of modules → tích MySQL**).
+3. XAMPP mặc định tài khoản `root` **không có mật khẩu** → ở Bước 5 khi được hỏi mật khẩu MySQL, **chỉ cần nhấn Enter** (để trống).
+
+### Cách 3B — Cài MySQL chính thức
+
 1. Vào **https://dev.mysql.com/downloads/installer/**
 2. Chọn file **lớn hơn** (*mysql-installer-community-8.x.x.msi*, khoảng 300MB) → **Download**.
    Trang tiếp theo bấm dòng chữ nhỏ **“No thanks, just start my download.”** (không cần tạo tài khoản).
@@ -128,13 +139,39 @@ MySQL sẽ tự chạy ngầm mỗi khi bật máy, không cần mở gì thêm.
 |---|---|
 | `setup.bat` báo **Chưa cài Node.js** | Làm lại Bước 2, sau đó **khởi động lại máy**. |
 | Lỗi **`Access denied for user 'root'`** | Sai mật khẩu MySQL. Xóa file `server\.env` rồi chạy lại `setup.bat`. |
-| Lỗi **`ECONNREFUSED ... 3306`** | MySQL chưa chạy: nhấn `Windows` → gõ **Services** → tìm **MySQL80** → chuột phải → **Start**. |
+| Lỗi **`ECONNREFUSED ... 3306`** / **không đăng nhập được** | MySQL chưa chạy. XAMPP: mở XAMPP Control Panel → **Start** MySQL. MySQL cài riêng: nhấn `Windows` → gõ **Services** → tìm **MySQL80** → chuột phải → **Start**. |
+| Đăng nhập báo **“Email hoặc mật khẩu không đúng”** dù gõ đúng / lỗi **`Unknown database 'edutrack'`** | Chưa tạo dữ liệu: chạy `setup.bat` hoặc nhập file `database\edutrack.sql` (Phụ lục 0). |
 | Lỗi **`EADDRINUSE ... 4000`** hoặc **5173** | Ứng dụng đang chạy rồi (có cửa sổ cũ). Đóng hết cửa sổ đen cũ rồi chạy lại `start.bat`. |
 | Đăng nhập báo **“Lỗi máy chủ”** / không phản hồi | Kiểm tra cửa sổ *Server* còn mở và không có chữ đỏ báo lỗi. |
 | Trả lời AI có chữ **“(Chế độ mock)”** | Chưa có/sai khóa Groq. Mở file `server\.env` bằng Notepad, sửa dòng `GROQ_API_KEY=gsk_...` và `AI_PROVIDER=groq`, lưu lại, đóng cửa sổ *Server* rồi chạy lại `start.bat`. |
 | `npm install` lỗi mạng | Kiểm tra Internet / tắt VPN, chạy lại `setup.bat`. |
 
 ---
+
+## Phụ lục 0 — Nhập sẵn dữ liệu bằng file `database/edutrack.sql`
+
+Repo có sẵn file **`database/edutrack.sql`**: toàn bộ CSDL kèm dữ liệu mẫu (52 người dùng gồm 48 sinh viên, 3 giảng viên, 1 quản trị; 9 khóa học, 38 bài học, 9 bài tập, 167 lượt ghi danh, 80 bài nộp có điểm AI và kết quả kiểm tra đạo văn — trong đó có vài cặp bài chép nhau để thử chức năng phát hiện đạo văn, 195 lượt làm trắc nghiệm, 93 bình luận, thông báo). Đã thử nhập thành công vào cả **XAMPP (MariaDB 10.4)** và **MySQL 8.4**.
+
+`setup.bat` đã tự tạo dữ liệu nên **không bắt buộc** dùng file này. Chỉ dùng khi muốn nạp dữ liệu vào MySQL có sẵn mà không chạy `setup.bat`, hoặc muốn khôi phục lại dữ liệu mẫu.
+
+**Cách nhập bằng phpMyAdmin (XAMPP):**
+1. XAMPP Control Panel → Start **Apache** và **MySQL** → bấm **Admin** ở dòng MySQL (mở http://localhost/phpmyadmin).
+2. Bấm tab **Import (Nhập)** ở trên cùng (không cần chọn database trước).
+3. **Choose File** → chọn `database\edutrack.sql` → kéo xuống bấm **Import / Go**.
+4. Bên trái xuất hiện database **edutrack** là xong.
+
+**Cách nhập bằng dòng lệnh:**
+```bash
+# XAMPP
+C:\xampp\mysql\bin\mysql.exe -u root --default-character-set=utf8mb4 < database\edutrack.sql
+# MySQL cài riêng (sẽ hỏi mật khẩu)
+mysql -u root -p --default-character-set=utf8mb4 < database/edutrack.sql
+```
+
+> ⚠️ File sẽ **xóa và tạo lại** các bảng trong database `edutrack`.
+> 📅 Ngày tháng trong file được tạo ngày 20/10/2026 nên một số hạn nộp bài có thể đã qua. Muốn dữ liệu mới theo ngày hiện tại: trong thư mục `server` chạy `npm run db:seed`.
+
+Sau khi nhập, vẫn cần có file `server\.env` (tạo bằng `setup.bat`, hoặc copy `server\.env.example` thành `.env` rồi điền mật khẩu và key), sau đó chạy `start.bat`.
 
 ## Phụ lục A — Cấu hình nâng cao (file `server\.env`)
 

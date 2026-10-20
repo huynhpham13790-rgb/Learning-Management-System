@@ -70,3 +70,19 @@ test('computeStreak đếm ngày học liên tiếp', () => {
 test('stripMarkdown bỏ ký hiệu định dạng', () => {
   assert.equal(stripMarkdown('## Tiêu đề\n**let** và `const`'), 'Tiêu đề\nlet và const');
 });
+
+test('findMostSimilar không báo oan khi nhiều bài cùng trích đề bài', () => {
+  const de = 'Promise có ba trạng thái pending fulfilled rejected và async await giúp xử lý bất đồng bộ';
+  const others = [
+    `${de}. Em dùng nó khi gọi API lấy danh sách sản phẩm cho website bán hàng.`,
+    `${de}. Nhóm em áp dụng trong đồ án quản lý thư viện ở kỳ trước.`,
+    `${de}. Mình thấy phần xử lý lỗi bằng try catch là khó nhất khi mới học.`,
+    `${de}. Bài lab tuần trước thầy cho đọc file JSON và hiển thị bảng điểm.`,
+  ];
+  const mine = `${de}. Tôi viết thử một hàm tải ảnh đại diện người dùng rồi hiện thông báo.`;
+  assert.ok(findMostSimilar(mine, others.map((content, id) => ({ id, content }))).score < 40);
+  const copied = `${others[1]} Em xin hết.`;
+  const best = findMostSimilar(copied, others.map((content, id) => ({ id, content })));
+  assert.equal(best.sourceId, 1);
+  assert.ok(best.score >= 40);
+});

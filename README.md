@@ -28,7 +28,9 @@ Chức năng mở rộng: trợ lý học tập AI (chat), AI sinh câu hỏi tr
 ├── server/            # Express REST API
 │   ├── src/{config,middleware,routes,services,scripts}
 │   └── tests/         # Unit test (node:test)
-├── database/schema.sql
+├── database/
+│   ├── schema.sql     # cấu trúc bảng
+│   └── edutrack.sql   # CSDL đầy đủ + dữ liệu mẫu, import thẳng vào MySQL/XAMPP
 └── docs/              # Tài liệu & báo cáo theo tuần
 ```
 
@@ -38,7 +40,9 @@ Chức năng mở rộng: trợ lý học tập AI (chat), AI sinh câu hỏi tr
 
 Cài thủ công:
 
-Yêu cầu: Node.js ≥ 18, MySQL 8.
+Yêu cầu: Node.js ≥ 18, MySQL 8 hoặc XAMPP (MariaDB ≥ 10.4).
+
+Có thể nhập sẵn dữ liệu bằng `database/edutrack.sql` (phpMyAdmin → Import) thay cho `db:init` + `db:seed`.
 
 ```bash
 # 1. Backend

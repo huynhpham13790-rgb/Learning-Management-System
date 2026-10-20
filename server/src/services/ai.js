@@ -47,12 +47,19 @@ export function activeProvider() {
   return 'mock';
 }
 
+const CALLERS = { groq: (...a) => callGroq(...a), gemini: (...a) => callGemini(...a), openai: (...a) => callOpenAI(...a) };
+
 async function complete(prompt, { json = false } = {}) {
-  const provider = activeProvider();
-  if (provider === 'groq') return callGroq(prompt, json);
-  if (provider === 'gemini') return callGemini(prompt, json);
-  if (provider === 'openai') return callOpenAI(prompt, json);
-  return null;
+  const call = CALLERS[activeProvider()];
+  if (!call) return null;
+  try {
+    return await call(prompt, json);
+  } catch (err) {
+    // Lỗi mạng tạm thời: thử lại 1 lần sau 1 giây
+    console.warn('[AI] thử lại:', err.message);
+    await new Promise((r) => setTimeout(r, 1000));
+    return call(prompt, json);
+  }
 }
 
 function extractJson(text) {

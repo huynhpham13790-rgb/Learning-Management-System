@@ -84,6 +84,8 @@ Chạy hoàn toàn cục bộ (không gửi bài làm ra ngoài, không tốn ph
 4. **Cosine similarity** trên vector tần suất từ (phát hiện viết lại/xáo trộn).
 5. **Điểm** = 70% containment + 30% cosine (0–100%).
 
+**Lọc cụm phổ biến**: khi có từ 5 bài trở lên, các cụm 3 từ xuất hiện ở ≥ 30% số bài (ví dụ cả lớp cùng trích đề bài, thuật ngữ bắt buộc) bị loại khỏi phép so sánh, khi đó điểm = 90% containment + 10% cosine. Nhờ vậy chỉ những đoạn trùng *riêng* giữa hai bài mới bị tính, tránh báo động giả.
+
 Mỗi bài nộp được so với mọi bài khác cùng bài tập; lưu điểm cao nhất và bài nguồn. Vượt ngưỡng `PLAGIARISM_THRESHOLD` (mặc định 40%) → gửi thông báo cảnh báo tới giảng viên.
 
 Kết quả kiểm thử thực tế: bài chép nguyên văn + thêm 1 câu → **95,6%**; hai bài khác chủ đề → < 10%.
