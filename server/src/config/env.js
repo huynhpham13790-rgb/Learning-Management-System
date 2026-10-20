@@ -18,6 +18,8 @@ export const env = {
     geminiModel: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
     openaiKey: process.env.OPENAI_API_KEY || '',
     openaiModel: process.env.OPENAI_MODEL || 'gpt-4o',
+    groqKey: process.env.GROQ_API_KEY || '',
+    groqModel: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
   },
   plagiarismThreshold: Number(process.env.PLAGIARISM_THRESHOLD || 40),
 };

@@ -3,7 +3,7 @@
 Đề tài thực tập tốt nghiệp tại **Công ty Cổ phần Công nghệ TFL**.
 Sinh viên: **Đặng Thị Thương** (DTC235200735 – CNTT K22K) · Cán bộ hướng dẫn: Lê Anh Duy.
 
-EduTrack AI là hệ thống LMS (Learning Management System) gồm trang **client** cho sinh viên và trang **admin** cho giảng viên/quản trị, tích hợp AI (Gemini / GPT‑4o) để:
+EduTrack AI là hệ thống LMS (Learning Management System) gồm trang **client** cho sinh viên và trang **admin** cho giảng viên/quản trị, tích hợp AI (**Groq** — mặc định, hoặc Gemini / GPT‑4o) để:
 
 - 🧭 **Gợi ý lộ trình học** cá nhân hóa theo mục tiêu và tiến độ.
 - 🤖 **Tự động chấm điểm** bài tự luận theo tiêu chí (rubric), kèm nhận xét điểm mạnh / cần cải thiện.
@@ -18,7 +18,7 @@ Chức năng mở rộng: trợ lý học tập AI (chat), AI sinh câu hỏi tr
 | Frontend | React 18, React Router 6, Vite 5, CSS thuần (responsive) |
 | Backend | Node.js ≥ 18, Express 4, JWT, bcryptjs |
 | CSDL | MySQL 8 (mysql2/promise) |
-| AI | Google Gemini API / OpenAI GPT‑4o (REST), chế độ `mock` chạy offline |
+| AI | Groq (`openai/gpt-oss-120b`, mặc định), Google Gemini, OpenAI GPT‑4o (REST), chế độ `mock` chạy offline |
 
 ## Cấu trúc thư mục
 
@@ -33,6 +33,10 @@ Chức năng mở rộng: trợ lý học tập AI (chat), AI sinh câu hỏi tr
 ```
 
 ## Cài đặt & chạy
+
+> 👉 **Người mới / máy chưa cài gì:** làm theo [HUONG-DAN-CAI-DAT.md](HUONG-DAN-CAI-DAT.md) — chỉ cần cài Node.js, MySQL rồi nhấp đúp `setup.bat` và `start.bat`.
+
+Cài thủ công:
 
 Yêu cầu: Node.js ≥ 18, MySQL 8.
 
@@ -64,9 +68,9 @@ Tài khoản mẫu (mật khẩu `123456`):
 Trong `server/.env`:
 
 ```env
-AI_PROVIDER=gemini        # hoặc openai, hoặc mock
-GEMINI_API_KEY=...        # https://aistudio.google.com/apikey
-OPENAI_API_KEY=...
+AI_PROVIDER=groq          # groq | gemini | openai | mock
+GROQ_API_KEY=gsk_...      # https://console.groq.com/keys
+GROQ_MODEL=openai/gpt-oss-120b
 ```
 
 Không có API key → hệ thống tự dùng chế độ **mock** (thuật toán heuristic) nên vẫn chạy đầy đủ chức năng. Nếu nhà cung cấp AI lỗi, hệ thống cũng tự động rơi về mock.
@@ -74,7 +78,9 @@ Không có API key → hệ thống tự dùng chế độ **mock** (thuật to�
 ### Kiểm thử
 
 ```bash
-cd server && npm test     # unit test thuật toán đạo văn, chấm điểm mock, lộ trình, streak
+cd server
+npm test          # unit test (không cần mạng)
+npm run test:ai   # kiểm thử AI thật: chấm điểm, lộ trình, chat, sinh câu hỏi
 ```
 
 ## Tài liệu

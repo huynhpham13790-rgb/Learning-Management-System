@@ -1,4 +1,4 @@
-// Lớp tích hợp AI: hỗ trợ Gemini, OpenAI (GPT-4o) và chế độ mock offline.
+// Lớp tích hợp AI: hỗ trợ Groq, Gemini, OpenAI (GPT-4o) và chế độ mock offline.
 // Mọi hàm đều tự động rơi về mock nếu nhà cung cấp lỗi, để hệ thống không bị gián đoạn.
 import { env } from '../config/env.js';
 import { normalize } from './plagiarism.js';
@@ -18,23 +18,30 @@ async function callGemini(prompt, json) {
   return data.candidates?.[0]?.content?.parts?.map((p) => p.text).join('') || '';
 }
 
-async function callOpenAI(prompt, json) {
-  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+// Groq dùng API tương thích OpenAI nên chung một hàm gọi
+async function callOpenAICompatible(url, key, model, prompt, json) {
+  const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${env.ai.openaiKey}` },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: env.ai.openaiModel,
+      model,
       messages: [{ role: 'user', content: prompt }],
       ...(json ? { response_format: { type: 'json_object' } } : {}),
     }),
   });
-  if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`${model} HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`);
   const data = await res.json();
   return data.choices?.[0]?.message?.content || '';
 }
 
+const callOpenAI = (prompt, json) =>
+  callOpenAICompatible('https://api.openai.com/v1/chat/completions', env.ai.openaiKey, env.ai.openaiModel, prompt, json);
+const callGroq = (prompt, json) =>
+  callOpenAICompatible('https://api.groq.com/openai/v1/chat/completions', env.ai.groqKey, env.ai.groqModel, prompt, json);
+
 export function activeProvider() {
-  const { provider, geminiKey, openaiKey } = env.ai;
+  const { provider, geminiKey, openaiKey, groqKey } = env.ai;
+  if (provider === 'groq' && groqKey) return 'groq';
   if (provider === 'gemini' && geminiKey) return 'gemini';
   if (provider === 'openai' && openaiKey) return 'openai';
   return 'mock';
@@ -42,6 +49,7 @@ export function activeProvider() {
 
 async function complete(prompt, { json = false } = {}) {
   const provider = activeProvider();
+  if (provider === 'groq') return callGroq(prompt, json);
   if (provider === 'gemini') return callGemini(prompt, json);
   if (provider === 'openai') return callOpenAI(prompt, json);
   return null;
@@ -52,9 +60,15 @@ function extractJson(text) {
   return JSON.parse(match ? match[0] : text);
 }
 
+const VI = '\nLuôn viết mọi nội dung bằng tiếng Việt.';
+
+// Bỏ ký hiệu Markdown để hiển thị dạng văn bản thuần
+export const stripMarkdown = (t) =>
+  t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/^#{1,6}\s+/gm, '').replace(/`([^`]+)`/g, '$1');
+
 async function withFallback(prompt, mockFn, { json = true } = {}) {
   try {
-    const text = await complete(prompt, { json });
+    const text = await complete(prompt + VI, { json });
     if (text == null) return { ...mockFn(), provider: 'mock' };
     return { ...(json ? extractJson(text) : { text }), provider: activeProvider() };
   } catch (err) {
@@ -161,12 +175,12 @@ export function mockChat(message) {
 
 export async function chatTutor(history, message) {
   const transcript = history.map((h) => `${h.role === 'user' ? 'Sinh viên' : 'Trợ lý'}: ${h.content}`).join('\n');
-  const prompt = `Bạn là trợ lý học tập thân thiện của hệ thống EduTrack AI, trả lời bằng tiếng Việt, ngắn gọn, có ví dụ khi cần, khuyến khích sinh viên tự tư duy.
+  const prompt = `Bạn là trợ lý học tập thân thiện của hệ thống EduTrack AI, trả lời bằng tiếng Việt, ngắn gọn, có ví dụ khi cần, khuyến khích sinh viên tự tư duy. Trả lời bằng văn bản thuần, không dùng định dạng Markdown (không dùng **, #).
 ${transcript}
 Sinh viên: ${message}
 Trợ lý:`;
   const result = await withFallback(prompt, () => ({ text: mockChat(message) }), { json: false });
-  return { reply: result.text.trim(), provider: result.provider };
+  return { reply: stripMarkdown(result.text).trim(), provider: result.provider };
 }
 
 /* ---------- 4. Sinh câu hỏi trắc nghiệm (chức năng mở rộng) ---------- */

@@ -1,7 +1,8 @@
+import './setup-mock.js';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { similarity, findMostSimilar, normalize } from '../src/services/plagiarism.js';
-import { mockGrade, mockLearningPath, mockQuiz, gradeSubmission } from '../src/services/ai.js';
+import { mockGrade, mockLearningPath, mockQuiz, gradeSubmission, stripMarkdown } from '../src/services/ai.js';
 import { computeStreak } from '../src/routes/stats.js';
 
 test('normalize giữ dấu tiếng Việt và bỏ ký tự đặc biệt', () => {
@@ -64,4 +65,8 @@ test('computeStreak đếm ngày học liên tiếp', () => {
   assert.equal(computeStreak(['2026-10-20', '2026-10-19', '2026-10-18', '2026-10-15'], today), 3);
   assert.equal(computeStreak(['2026-10-19', '2026-10-18'], today), 2);
   assert.equal(computeStreak(['2026-10-10'], today), 0);
+});
+
+test('stripMarkdown bỏ ký hiệu định dạng', () => {
+  assert.equal(stripMarkdown('## Tiêu đề\n**let** và `const`'), 'Tiêu đề\nlet và const');
 });
