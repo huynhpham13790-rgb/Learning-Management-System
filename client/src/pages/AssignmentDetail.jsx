@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
-import { AiFeedback, Loader, PlagiarismBadge, STATUS, fmtDate, useFetch } from '../components/ui.jsx';
+import { AiFeedback, Loader, PlagiarismBadge, STATUS, fmtDate, fmtScore, useFetch } from '../components/ui.jsx';
 
 export default function AssignmentDetail() {
   const { id } = useParams();
@@ -61,7 +61,7 @@ export default function AssignmentDetail() {
                 </p>
                 {s.status === 'graded' && (
                   <div className="alert ok">
-                    Điểm chính thức: <b>{s.score}</b>/{a.max_score}
+                    Điểm chính thức: <b>{fmtScore(s.score)}</b>/{a.max_score}
                     {s.teacher_feedback && <p>Nhận xét của giảng viên: {s.teacher_feedback}</p>}
                   </div>
                 )}

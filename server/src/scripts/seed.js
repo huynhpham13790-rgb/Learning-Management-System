@@ -16,6 +16,10 @@ const rand = () => {
   t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
   return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
 };
+// Định dạng DATETIME theo giờ địa phương (không dùng toISOString vì đó là giờ UTC)
+const pad = (n) => String(n).padStart(2, '0');
+const localSql = (d) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 const int = (a, b) => a + Math.floor(rand() * (b - a + 1));
 const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 const shuffle = (arr) => [...arr].sort(() => rand() - 0.5);
@@ -23,7 +27,7 @@ const daysAgo = (d, h = int(7, 22), m = int(0, 59)) => {
   const t = new Date();
   t.setDate(t.getDate() - d);
   t.setHours(h, m, 0, 0);
-  return t.toISOString().slice(0, 19).replace('T', ' ');
+  return localSql(t);
 };
 
 /* ---------------- Xóa dữ liệu cũ ---------------- */
@@ -284,7 +288,7 @@ for (const [ci, c] of COURSES.entries()) {
     due.setDate(due.getDate() + dueIn);
     due.setHours(23, 59, 0, 0);
     const a = await q('INSERT INTO assignments (course_id, title, description, rubric, max_score, due_date, created_at) VALUES (?, ?, ?, ?, 10, ?, ?)', [
-      c.id, title, description, rubric, due.toISOString().slice(0, 19).replace('T', ' '), daysAgo(int(20, 40)),
+      c.id, title, description, rubric, localSql(due), daysAgo(int(20, 40)),
     ]);
     c.assignmentRows.push({ id: a.insertId, title, description, rubric, max_score: 10, dueIn });
   }

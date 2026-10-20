@@ -69,6 +69,7 @@ test('computeStreak đếm ngày học liên tiếp', () => {
 
 test('stripMarkdown bỏ ký hiệu định dạng', () => {
   assert.equal(stripMarkdown('## Tiêu đề\n**let** và `const`'), 'Tiêu đề\nlet và const');
+  assert.equal(stripMarkdown('Ví dụ:\n```js\nlet a = 1;\n```'), 'Ví dụ:\n\nlet a = 1;\n');
 });
 
 test('findMostSimilar không báo oan khi nhiều bài cùng trích đề bài', () => {

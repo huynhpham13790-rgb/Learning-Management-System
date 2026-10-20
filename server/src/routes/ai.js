@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { query, queryOne } from '../config/db.js';
 import { authenticate } from '../middleware/auth.js';
-import { asyncHandler, requireFields, parseJson } from '../utils/http.js';
+import { asyncHandler, HttpError, requireFields, parseJson } from '../utils/http.js';
 import { activeProvider, chatTutor, recommendLearningPath } from '../services/ai.js';
 
 const router = Router();
@@ -15,6 +15,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const user = await queryOne('SELECT goals FROM users WHERE id = ?', [req.user.id]);
     const goal = (req.body.goal || user.goals || '').trim();
+    if (!goal) throw new HttpError(400, 'Hãy nhập mục tiêu học tập để AI gợi ý lộ trình');
     const courses = await query('SELECT id, title, category, level, description FROM courses WHERE published = 1');
     const progress = await query(
       `SELECT l.course_id, ROUND(COUNT(lp.lesson_id) / COUNT(l.id) * 100) AS percent

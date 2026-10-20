@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { api } from '../api/client.js';
-import { Loader, STATUS, fmtDate, useFetch } from '../components/ui.jsx';
+import { Loader, STATUS, fmtDate, fmtScore, useFetch } from '../components/ui.jsx';
 
 export default function Assignments() {
   const state = useFetch(() => api.get('/assignments/my'));
@@ -40,7 +40,7 @@ export default function Assignments() {
                             <span className={`badge ${overdue ? 'danger' : 'light'}`}>{overdue ? 'Quá hạn' : 'Chưa nộp'}</span>
                           )}
                         </td>
-                        <td>{a.score != null ? `${a.score}/${a.max_score}` : '—'}</td>
+                        <td>{a.score != null ? `${fmtScore(a.score)}/${a.max_score}` : '—'}</td>
                       </tr>
                     );
                   })}

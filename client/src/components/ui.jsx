@@ -1,4 +1,26 @@
-import { useEffect, useState } from 'react';
+import { Component, useEffect, useState } from 'react';
+
+// Bắt lỗi giao diện để một trang lỗi không làm trắng toàn bộ ứng dụng
+export class ErrorBoundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) {
+    return { error };
+  }
+  componentDidUpdate(prev) {
+    if (prev.resetKey !== this.props.resetKey && this.state.error) this.setState({ error: null });
+  }
+  render() {
+    if (!this.state.error) return this.props.children;
+    return (
+      <div className="alert error">
+        <b>Trang gặp lỗi hiển thị.</b> {this.state.error.message}
+        <div>
+          <button className="btn small" onClick={() => window.location.reload()}>Tải lại trang</button>
+        </div>
+      </div>
+    );
+  }
+}
 
 // Hook tải dữ liệu đơn giản: trả về { data, error, loading, reload, setData }
 export function useFetch(fn, deps = []) {
@@ -69,14 +91,18 @@ export const STATUS = { submitted: 'Đã nộp', ai_graded: 'AI đã chấm sơ 
 export function fmtDate(v, withTime = true) {
   if (!v) return '—';
   const d = new Date(String(v).replace(' ', 'T'));
-  return withTime ? d.toLocaleString('vi-VN') : d.toLocaleDateString('vi-VN');
+  const date = d.toLocaleDateString('vi-VN');
+  return withTime ? `${date} ${d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}` : date;
 }
+
+// 6.00 -> 6, 7.50 -> 7.5
+export const fmtScore = (v) => (v == null || v === '' ? '—' : String(Number(v)));
 
 export function PlagiarismBadge({ score }) {
   if (score == null) return <span className="muted">—</span>;
   const n = Number(score);
   const cls = n >= 40 ? 'danger' : n >= 20 ? 'warn' : 'ok';
-  return <span className={`badge ${cls}`}>{n}%</span>;
+  return <span className={`badge ${cls}`}>{n.toFixed(1)}%</span>;
 }
 
 // Hiển thị điểm & nhận xét AI
@@ -85,7 +111,7 @@ export function AiFeedback({ feedback, score, max }) {
   return (
     <div className="ai-box">
       <div className="ai-head">
-        🤖 AI chấm sơ bộ: <b>{score}</b>/{max} <span className="muted small">({feedback.provider})</span>
+        🤖 AI chấm sơ bộ: <b>{fmtScore(score)}</b>/{max} <span className="muted small">({feedback.provider})</span>
       </div>
       <p>{feedback.feedback}</p>
       {feedback.strengths?.length > 0 && (

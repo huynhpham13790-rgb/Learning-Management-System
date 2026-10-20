@@ -121,7 +121,7 @@ table { width: 100%; border-collapse: collapse; }
 th, td { padding: 11px 16px; text-align: left; border-bottom: 1px solid var(--border); vertical-align: middle; }
 th { background: #f8f9fc; font-size: 0.82rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.03em; }
 tr.highlight td { background: var(--primary-soft); }
-.actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: wrap; }
+.actions { display: flex; gap: 6px; justify-content: flex-end; flex-wrap: nowrap; white-space: nowrap; }
 
 /* Courses */
 .course-card { color: var(--text); display: flex; flex-direction: column; gap: 6px; margin: 0; transition: transform 0.15s; }

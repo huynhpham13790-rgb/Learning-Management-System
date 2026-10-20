@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../../api/client.js';
-import { AiFeedback, Loader, Modal, PlagiarismBadge, STATUS, fmtDate, useFetch } from '../../components/ui.jsx';
+import { AiFeedback, Loader, Modal, PlagiarismBadge, STATUS, fmtDate, fmtScore, useFetch } from '../../components/ui.jsx';
 
 export default function AdminSubmissions() {
   const { id } = useParams();
@@ -13,7 +13,7 @@ export default function AdminSubmissions() {
 
   const show = (s) => {
     setOpen(s);
-    setGrade({ score: s.score ?? s.ai_score ?? '', teacher_feedback: s.teacher_feedback || '' });
+    setGrade({ score: Number(s.score ?? s.ai_score ?? 0), teacher_feedback: s.teacher_feedback || '' });
   };
   const replace = (s) => {
     state.setData((list) => list.map((x) => (x.id === s.id ? { ...x, ...s } : x)));
@@ -28,7 +28,9 @@ export default function AdminSubmissions() {
   };
   const aiGrade = async () => {
     setBusy('ai');
-    replace(await api.post(`/assignments/submissions/${open.id}/ai-grade`));
+    const s = await api.post(`/assignments/submissions/${open.id}/ai-grade`);
+    replace(s);
+    if (s.status !== 'graded') setGrade((g) => ({ ...g, score: Number(s.ai_score) }));
     setBusy('');
   };
   const saveGrade = async (e) => {
@@ -76,8 +78,8 @@ export default function AdminSubmissions() {
                     <tr key={s.id}>
                       <td>{s.student_name}<br /><small className="muted">{s.student_email}</small></td>
                       <td>{fmtDate(s.submitted_at)}</td>
-                      <td>{s.ai_score ?? '—'}</td>
-                      <td>{s.status === 'graded' ? <b>{s.score}</b> : '—'}</td>
+                      <td>{fmtScore(s.ai_score)}</td>
+                      <td>{s.status === 'graded' ? <b>{fmtScore(s.score)}</b> : '—'}</td>
                       <td>
                         <PlagiarismBadge score={s.plagiarism_score} />
                         {s.plagiarism_source_id && Number(s.plagiarism_score) >= 20 && (

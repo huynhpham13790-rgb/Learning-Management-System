@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../api/client.js';
-import { ROLES, fmtDate } from './ui.jsx';
+import { ErrorBoundary, ROLES, fmtDate } from './ui.jsx';
 
 const STUDENT_NAV = [
   ['/', 'Tổng quan', '🏠'],
@@ -68,6 +68,7 @@ function NotificationBell() {
 export default function Layout() {
   const { user, logout, isStaff } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [menu, setMenu] = useState(false);
 
   const nav = (items) =>
@@ -120,7 +121,9 @@ export default function Layout() {
           </button>
         </header>
         <main className="content">
-          <Outlet />
+          <ErrorBoundary resetKey={location.pathname}>
+            <Outlet />
+          </ErrorBoundary>
         </main>
       </div>
     </div>

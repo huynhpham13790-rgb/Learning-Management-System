@@ -71,7 +71,7 @@ const VI = '\nLuôn viết mọi nội dung bằng tiếng Việt.';
 
 // Bỏ ký hiệu Markdown để hiển thị dạng văn bản thuần
 export const stripMarkdown = (t) =>
-  t.replace(/\*\*(.+?)\*\*/g, '$1').replace(/^#{1,6}\s+/gm, '').replace(/`([^`]+)`/g, '$1');
+  t.replace(/^```[\w-]*\s*$/gm, '').replace(/\*\*(.+?)\*\*/g, '$1').replace(/^#{1,6}\s+/gm, '').replace(/`([^`]+)`/g, '$1');
 
 async function withFallback(prompt, mockFn, { json = true } = {}) {
   try {

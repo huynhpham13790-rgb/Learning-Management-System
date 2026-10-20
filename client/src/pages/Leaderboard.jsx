@@ -31,8 +31,8 @@ export default function Leaderboard() {
                     <td>{MEDALS[i] || i + 1}</td>
                     <td>{r.name}</td>
                     <td>{r.lessons}</td>
-                    <td>{Number(r.quiz_points)}</td>
-                    <td>{Number(r.assignment_points)}</td>
+                    <td>{Math.round(Number(r.quiz_points) * 10) / 10}</td>
+                    <td>{Math.round(Number(r.assignment_points) * 10) / 10}</td>
                     <td>
                       <b>{r.points}</b>
                     </td>

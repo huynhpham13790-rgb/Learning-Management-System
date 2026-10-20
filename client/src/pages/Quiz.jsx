@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
-import { Loader, fmtDate, useFetch } from '../components/ui.jsx';
+import { Loader, fmtDate, fmtScore, useFetch } from '../components/ui.jsx';
 
 export default function Quiz() {
   const { id } = useParams();
@@ -92,7 +92,7 @@ export default function Quiz() {
               <ul className="list">
                 {quiz.attempts.map((a) => (
                   <li key={a.id}>
-                    <b>{a.score}/10</b> <small className="muted">{fmtDate(a.created_at)}</small>
+                    <b>{fmtScore(a.score)}/10</b> <small className="muted">{fmtDate(a.created_at)}</small>
                   </li>
                 ))}
               </ul>

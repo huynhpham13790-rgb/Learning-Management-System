@@ -1,7 +1,7 @@
 import { Link, useParams } from 'react-router-dom';
 import { api } from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
-import { LEVELS, Loader, ProgressBar, STATUS, fmtDate, useFetch } from '../components/ui.jsx';
+import { LEVELS, Loader, ProgressBar, STATUS, fmtDate, fmtScore, useFetch } from '../components/ui.jsx';
 
 export default function CourseDetail() {
   const { id } = useParams();
@@ -73,7 +73,7 @@ export default function CourseDetail() {
                         {canView ? <Link to={`/assignments/${a.id}`}>{a.title}</Link> : a.title}
                         <small className="muted">
                           Hạn: {fmtDate(a.due_date)} · {a.submission_status ? STATUS[a.submission_status] : 'Chưa nộp'}
-                          {a.score != null && ` · ${a.score}/${a.max_score}`}
+                          {a.score != null && ` · ${fmtScore(a.score)}/${a.max_score}`}
                         </small>
                       </li>
                     ))}
@@ -87,7 +87,7 @@ export default function CourseDetail() {
                       <li key={q.id}>
                         {canView ? <Link to={`/quizzes/${q.id}`}>{q.title}</Link> : q.title}
                         <small className="muted">
-                          {q.question_count} câu · cao nhất: {q.best_score ?? 'chưa làm'}
+                          {q.question_count} câu · cao nhất: {q.best_score != null ? fmtScore(q.best_score) : 'chưa làm'}
                         </small>
                       </li>
                     ))}

@@ -36,6 +36,7 @@ export default function LearningPath() {
         <label>
           Mục tiêu học tập của bạn
           <input
+            required
             value={goal}
             onChange={(e) => setGoal(e.target.value)}
             placeholder="VD: Trở thành lập trình viên Frontend React trong 3 tháng"

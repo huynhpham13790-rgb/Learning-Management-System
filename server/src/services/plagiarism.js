@@ -66,9 +66,9 @@ export function commonShingles(texts, ratio = 0.3) {
 }
 
 // So một bài với danh sách bài khác, trả về bài giống nhất.
-// Khi đủ nhiều bài (>= 5) thì lọc bỏ các cụm phổ biến để tránh báo động giả.
+// Khi có từ 4 bài trở lên thì lọc bỏ các cụm phổ biến để tránh báo động giả.
 export function findMostSimilar(content, others) {
-  const common = others.length >= 4 ? commonShingles([content, ...others.map((o) => o.content)]) : null;
+  const common = others.length >= 3 ? commonShingles([content, ...others.map((o) => o.content)]) : null;
   let best = { score: 0, sourceId: null };
   for (const o of others) {
     const score = similarity(content, o.content, common);

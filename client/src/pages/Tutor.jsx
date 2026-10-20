@@ -12,7 +12,9 @@ export default function Tutor() {
   useEffect(() => {
     api.get('/ai/chat').then(setMessages);
   }, []);
-  useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth' }), [messages]);
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const send = async (msg) => {
     const message = (msg ?? text).trim();
